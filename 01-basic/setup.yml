@@ -7,5 +7,6 @@
 
   tasks:
     - name: ==> 0 - add host info
+      # equals enhance sec , http://docs.ansible.com/ansible/lineinfile_module.html
       lineinfile: dest=/etc/hosts line="10.0.0.10  {{ hostname }}" state=present
 
