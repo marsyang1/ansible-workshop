@@ -1,4 +1,5 @@
-# host usually use all , but sometime and apply to some server role
+# host usually use all , sometime and apply to some server role
+# but also can use ansible-playbook with --limit , more dynamicly
 - hosts: all
   # sudo permission
   become: true
