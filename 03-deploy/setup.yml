@@ -56,6 +56,7 @@
 
     - name: extract wordpress tarball
       unarchive:
+        ## after Ansible2.0 , unarchive get use http at src , It's mean no need use get_url
         src: "/tmp/wordpress-{{ wordpress_version }}-zh_TW.tar.gz"
         dest: "{{ wordpress_parent_path }}"
         owner: "{{ wordpress_owner }}"
