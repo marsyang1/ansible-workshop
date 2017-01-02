@@ -1,0 +1,55 @@
+- hosts: all
+  become: true
+
+  vars:
+    os_user: ubuntu
+    confluence_home_path: /home/ubuntu/confluence_home
+    mysql_home_path: /home/ubuntu/mysql_home
+    mysql_admin_pass: 1234
+    confluence_db_name: confluence
+    confluence_db_user: confluence
+    confluence_db_password: confluence
+
+  tasks:
+    - name: ==> 1 create confluence_home folder
+      file: path={{ confluence_home_path }} owner={{ os_user }} group={{ os_user }} state=directory mode=0775
+
+    - name: ==> 2 create mysql_home folder
+      file: path={{ mysql_home_path }} owner={{ os_user }} group={{ os_user }} state=directory mode=0775
+
+    - name: ==> 3 run docker mysql
+      docker_container:
+        name: db-mysql
+        image: mysql
+        restart_policy: always
+        ports:
+          - "3306:3306"
+        volumes:
+          - "{{ mysql_home_path }}:/var/lib/mysql"
+        env:
+          MYSQL_ROOT_PASSWORD: "{{ mysql_admin_pass }}"
+        command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+    - name: ==> install prerequisite for Ansible's mysql modules , mysql-client for manual check.
+      apt: name={{ item }} state=present
+      with_items:
+        - python-mysqldb
+        - mysql-client-core-5.6
+
+    - name: ==> create confluence db
+      mysql_db:
+        login_host: 127.0.0.1
+        name: "{{ confluence_db_name }}"
+        login_user: root
+        login_password: "{{ mysql_admin_pass }}"
+        state: present
+
+    - name: ==> create confluence user
+      mysql_user:
+        name:     "{{ confluence_db_user }}"
+        password: "{{ confluence_db_password }}"
+        priv:     "{{ confluence_db_name }}.*:ALL"
+        login_host: 127.0.0.1
+        login_user: root
+        login_password: "{{ mysql_admin_pass }}"
+        state: present
