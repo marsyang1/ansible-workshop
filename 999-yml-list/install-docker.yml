@@ -1,0 +1,44 @@
+- hosts: all
+  become: true
+
+  tasks:
+
+    - name: ==> 1 - download/update the package lists
+      apt: update_cache=yes
+
+    - name: ==> 2 - install apt-transport-https and ca-certificates
+      apt: name={{ item }} state=present
+      with_items:
+        - apt-transport-https
+        - ca-certificates
+
+    - debug: msg="==> 3 - add PPA of docker (official)"
+
+    - name: add docker key
+      apt_key:
+        keyserver: 'hkp://p80.pool.sks-keyservers.net:80'
+        id: 58118E89F3A912897C070ADBF76221572C52609D
+
+# should write if else...for diff version.
+    - name: add docker stable repository (deb) ubuntu-xenial(16.04 LTS)
+      apt_repository:
+        repo: 'deb https://apt.dockerproject.org/repo ubuntu-xenial main'
+        state: present
+
+    - name: download/update the package lists
+      apt: update_cache=yes
+
+    - name: ==> 4 install docker-engine, python-pip , docker-py is required for the Ansible Docker module
+      apt: name={{ item }} state=present
+      with_items:
+        - docker-engine
+        - python-pip
+    - name: ==> install docker-py , docker-py is required for the Ansible Docker module
+      pip: name=docker-py
+
+
+    - name: ==> 5 start docker-engine
+      service: name=docker state=started
+
+    - name: ==> 6 run docker hello-world
+      docker: name=hello-world image=hello-world

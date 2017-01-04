@@ -1,0 +1,21 @@
+- hosts: all
+  become: true
+
+  vars:
+    hostname: icinga
+
+  tasks:
+    - include: install-docker.yml
+
+    - name: ==> 1 - run docker icinga
+      docker:
+        name: icinga2
+        image: icinga/icinga2
+        state: present
+        ports:
+          - "10001:80"
+        volumes:
+          - "/home/vagrant/docker-workshop/icinga2_home/constants.conf:/etc/icinga2/constants.conf"
+          - "/home/vagrant/docker-workshop/icinga2_home/zones.conf:/etc/icinga2/zones.conf"
+          - "/home/vagrant/docker-workshop/icinga2_home/hosts.conf:/etc/icinga2/conf.d/hosts.conf"
+          - "/home/vagrant/docker-workshop/icinga2_home/templates.conf:/etc/icinga2/conf.d/templates.conf"
